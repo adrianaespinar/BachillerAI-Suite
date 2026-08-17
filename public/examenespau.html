@@ -201,8 +201,6 @@
 </div>
 
 <script>
-
-  // Aislamiento total: variables en memoria, se limpian al recargar.
   let mainChatHistory = [];
   
   function toggleSidebot() {
@@ -216,13 +214,11 @@
     msgDiv.className = `msg ${role}`;
     if (msgId) msgDiv.id = msgId;
     
-    // Parseo rápido de markdown a HTML usando la librería marked
     msgDiv.innerHTML = role === 'ai' && text !== '...' ? marked.parse(text) : text;
     
     container.appendChild(msgDiv);
     container.scrollTop = container.scrollHeight;
     
-    // Renderizado de matemáticas si KaTeX está disponible
     if (window.renderMathInElement) {
         renderMathInElement(msgDiv, {
             delimiters: [
@@ -257,7 +253,6 @@
 
     appendMessage('side-messages', 'user', text);
 
-    // Conexión del contexto: Se inserta la memoria del chat principal en el prompt del chatbot lateral.
     const contextStr = mainChatHistory.map(m => `${m.role === 'user' ? 'Alumno' : 'IA Principal'}: ${m.content}`).join('\n\n');
     const sidePrompt = `Eres un asistente de dudas rápidas. Aquí tienes el contexto de la conversación principal actual que el usuario está teniendo con la IA principal:\n\n[CONTEXTO COMIENZA]\n${contextStr || 'Ningún contexto previo, es el primer mensaje.'}\n[CONTEXTO TERMINA]\n\nDuda del usuario referida al contexto: ${text}\n\nResponde de forma clara, directa y coherente con el contexto.`;
 
@@ -265,7 +260,6 @@
     appendMessage('side-messages', 'ai', '...', tempId);
 
     try {
-      // Impulsado por Groq como se solicitó para las dudas rápidas.
       const response = await fetch('/api/groq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -281,9 +275,7 @@
     container.scrollTop = container.scrollHeight;
   }
 
-
-
-async function sendMainMessage() {
+  async function sendMainMessage() {
     const input = document.getElementById('main-input');
     const text = input.value.trim();
     if(!text) return;
@@ -309,8 +301,7 @@ async function sendMainMessage() {
     } catch (err) {
         updateMessage(tempId, "Error al conectar con la IA de Exámenes.");
     }
-}
-
+  }
 </script>
 </body>
 </html>
