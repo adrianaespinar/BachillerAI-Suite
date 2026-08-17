@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Matemáticas y Física (IA Resolutiva) - BachillerAI-Suite</title>
-<link rel="icon" href="/photos/circlelogo.jpeg" type="image/jpeg">
+<link rel="icon" href="/circlelogo.jpeg" type="image/jpeg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -136,7 +136,7 @@
 
   .sidebot-fab {
     width: 64px; height: 64px; border-radius: 50%; border: 3px solid var(--gold);
-    background-image: url('/photos/circlelogo.jpeg'); background-size: cover; background-position: center;
+    background-image: url('/circlelogo.jpeg'); background-size: cover; background-position: center;
     cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,0.2); transition: transform 0.2s;
   }
   .sidebot-fab:hover { transform: scale(1.05); }
@@ -152,7 +152,7 @@
 
 <nav class="topbar">
   <div class="marca">
-    <img src="/photos/simplylogo.png" alt="Logo">
+    <img src="/simplylogo.png" alt="Logo">
     BachillerAI-Suite
   </div>
   <ul>
@@ -296,7 +296,7 @@ async function sendMainMessage() {
     appendMessage('main-messages', 'ai', 'Calculando y resolviendo paso a paso...', tempId);
 
     try {
-        const response = await fetch('/api/gemini', {
+        const response = await fetch('/api/matematicas', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ prompt: text })

@@ -3,10 +3,25 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const { prompt } = req.body;
+  // Parseo seguro de req.body por si llega como string (igual que en feynman.js)
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      return res.status(400).json({ error: 'JSON inválido en el cuerpo de la petición' });
+    }
+  }
+
+  const { prompt } = body || {};
 
   if (!prompt) {
     return res.status(400).json({ error: 'Falta el campo "prompt" en el body' });
+  }
+
+  const apiKey = process.env.GROQ_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Falta la clave GROQ_KEY en .env.local' });
   }
 
   try {
@@ -14,14 +29,14 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_KEY}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: 'openai/gpt-oss-120b',
         messages: [
           {
             role: 'system',
-            content: 'Eres un generador de exámenes tipo PAU/Selectividad. Genera preguntas realistas, claras y bien estructuradas según lo que te pida el usuario.'
+            content: 'Eres un generador de exámenes especializado ÚNICAMENTE en el diseño, formato y preparación de exámenes con criterio PAU/Selectividad. Genera preguntas realistas, claras y bien estructuradas según lo que te pida el usuario, e incluye siempre al final un apartado de "Soluciones" con la respuesta correcta de cada pregunta tipo test.'
           },
           {
             role: 'user',
@@ -40,8 +55,8 @@ export default async function handler(req, res) {
     const data = await groqResponse.json();
     const texto = data.choices?.[0]?.message?.content ?? '';
 
-    res.status(200).json({ resultado: texto });
+    return res.status(200).json({ resultado: texto });
   } catch (error) {
-    res.status(500).json({ error: 'Error al contactar con Groq', detalle: error.message });
+    return res.status(500).json({ error: 'Error al contactar con Groq', detalle: error.message });
   }
 }

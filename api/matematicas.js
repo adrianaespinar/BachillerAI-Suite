@@ -3,16 +3,32 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const { prompt } = req.body;
+  // Parseo seguro de req.body por si llega como string (igual que en feynman.js)
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      return res.status(400).json({ error: 'JSON inválido en el cuerpo de la petición' });
+    }
+  }
+
+  const { prompt } = body || {};
 
   if (!prompt) {
     return res.status(400).json({ error: 'Falta el campo "prompt" en el body' });
+  }
+
+  const apiKey = process.env.GOOGLE_AI_STUDIO_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Falta la clave GOOGLE_AI_STUDIO_KEY en .env.local' });
   }
 
   const modelo = 'gemini-3-flash-preview';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
 
   const systemInstruction = `Eres un tutor de Matemáticas y Física de 2º de Bachillerato, preparando al alumno para la PAU/Selectividad.
+No respondas preguntas ajenas a Matemáticas o Física; si el usuario pregunta algo fuera de tu materia, indícalo y redirígelo al apartado correcto.
 Reglas estrictas:
 - Resuelve SIEMPRE paso a paso, mostrando cada operación intermedia, nunca solo el resultado final.
 - Usa notación KaTeX para todas las expresiones matemáticas: fórmulas en línea entre $...$ y fórmulas destacadas entre $$...$$.
@@ -21,7 +37,7 @@ Reglas estrictas:
 - Al final, resume el resultado en una línea clara.`;
 
   try {
-    const geminiResponse = await fetch(`${url}?key=${process.env.GOOGLE_AI_STUDIO_KEY}`, {
+    const geminiResponse = await fetch(`${url}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -48,8 +64,8 @@ Reglas estrictas:
     const data = await geminiResponse.json();
     const texto = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 
-    res.status(200).json({ resultado: texto });
+    return res.status(200).json({ resultado: texto });
   } catch (error) {
-    res.status(500).json({ error: 'Error al contactar con Gemini', detalle: error.message });
+    return res.status(500).json({ error: 'Error al contactar con Gemini', detalle: error.message });
   }
 }
