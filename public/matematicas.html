@@ -1,15 +1,316 @@
 <!DOCTYPE html>
-<html> 
-  <head>
-        
-        <title>BachillerAI-Suite</title>
-     <link rel="icon" type="image/jpg" href="imagenes/fotoangel.jpg">
-     </head>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Matemáticas y Física (IA Resolutiva) - BachillerAI-Suite</title>
+<link rel="icon" href="/photos/circlelogo.jpeg" type="image/jpeg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Markdown Parser -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<!-- KaTeX for Math rendering -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+<style>
+
+  :root {
+    --navy-deep: #101a2c;
+    --navy: #16233B;
+    --navy-soft: #23345a;
+    --gold: #c9a227;
+    --gold-light: #e0c15c;
+    --cream: #f7f5f0;
+    --cream-warm: #f0ecdf;
+    --ink: #23262b;
+    --ink-soft: #5b6270;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    background: var(--cream);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 600; }
+  
+  /* --- NAV --- */
+  nav.topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px clamp(20px, 5vw, 60px);
+    background: var(--navy-deep);
+    border-bottom: 1px solid rgba(201,162,39,0.25);
+    flex-shrink: 0;
+  }
+  nav.topbar .marca { display: flex; align-items: center; gap: 10px; font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; color: #f4f1e8; }
+  nav.topbar .marca img { height: 30px; width: auto; }
+  nav.topbar ul { display: flex; gap: 28px; list-style: none; }
+  nav.topbar ul a { text-decoration: none; color: #cfd4de; font-size: 14px; font-weight: 500; }
+  nav.topbar ul a:hover { color: var(--gold-light); }
+
+  /* --- LAYOUT PRINCIPAL --- */
+  .layout {
+    display: flex; flex: 1; overflow: hidden; padding: 24px clamp(20px, 5vw, 60px); gap: 24px; max-width: 1400px; margin: 0 auto; width: 100%;
+  }
+  .main-chat {
+    flex: 1; display: flex; flex-direction: column; background: #fff;
+    border-radius: 12px; box-shadow: 0 4px 20px rgba(22,35,59,0.08); border: 1px solid #e6e0cf; overflow: hidden;
+  }
+  .chat-header {
+    padding: 20px 24px; border-bottom: 1px solid #e6e0cf; background: var(--cream-warm);
+  }
+  .chat-header h1 { font-size: 22px; color: var(--navy); margin-bottom: 4px; }
+  .chat-header p { font-size: 14px; color: var(--ink-soft); }
+  .disclaimer {
+    font-size: 12px; color: var(--gold); background: rgba(201,162,39,0.08);
+    padding: 10px 14px; border-radius: 6px; border: 1px dashed var(--gold-light); margin-top: 12px;
+  }
+
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 18px;
+  }
+  .msg-wrapper { display: flex; flex-direction: column; width: 100%; }
+  .msg {
+    max-width: 85%; padding: 14px 18px; border-radius: 10px; font-size: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .msg p { margin-bottom: 10px; }
+  .msg p:last-child { margin-bottom: 0; }
+  .msg.user {
+    align-self: flex-end; background: var(--navy); color: #fff; border-bottom-right-radius: 2px;
+  }
+  .msg.ai {
+    align-self: flex-start; background: #fff; border: 1px solid #e6e0cf; border-bottom-left-radius: 2px; color: var(--ink);
+  }
+  
+  .chat-input-area {
+    padding: 16px 24px; background: #fff; border-top: 1px solid #e6e0cf; display: flex; gap: 12px; align-items: flex-end;
+  }
+  .chat-input-area textarea {
+    flex: 1; resize: none; border: 1px solid #ccc; border-radius: 8px; padding: 12px; font-family: 'Inter', sans-serif;
+    font-size: 15px; min-height: 52px; max-height: 150px; background: var(--cream); outline: none; transition: border 0.2s;
+  }
+  .chat-input-area textarea:focus { border-color: var(--gold); }
+  .chat-input-area button {
+    background: var(--gold); color: var(--navy-deep); border: none; padding: 0 24px; height: 52px;
+    border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+  }
+  .chat-input-area button:hover { background: var(--gold-light); }
+
+  /* --- SIDEBOT WIDGET --- */
+  .sidebot-widget {
+    position: fixed; bottom: 30px; right: 30px; z-index: 100; display: flex; flex-direction: column; align-items: flex-end; gap: 16px;
+  }
+  .sidebot-panel {
+    width: 360px; height: 520px; background: #fff; border-radius: 12px; box-shadow: 0 10px 30px rgba(22,35,59,0.15);
+    display: none; flex-direction: column; overflow: hidden; border: 1px solid #e6e0cf;
+    transform-origin: bottom right; transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .sidebot-panel.open { display: flex; animation: slideUp 0.3s ease forwards; }
+  
+  @keyframes slideUp { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+  .sidebot-header {
+    background: var(--navy-deep); color: #fff; padding: 16px; font-weight: 600; font-family: 'Fraunces', serif;
+    display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+  }
+  .sidebot-header button { background: rgba(255,255,255,0.1); border: none; color: #fff; cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+  .sidebot-header button:hover { background: rgba(255,255,255,0.2); }
+  
+  .sidebot-panel .chat-messages { padding: 16px; gap: 12px; background: var(--cream); }
+  .sidebot-panel .msg { font-size: 13px; padding: 10px 14px; max-width: 90%; }
+  
+  .sidebot-panel .chat-input-area { padding: 12px; }
+  .sidebot-panel textarea { min-height: 44px; height: 44px; padding: 10px; font-size: 13px; }
+  .sidebot-panel .chat-input-area button { height: 44px; padding: 0 16px; }
+
+  .sidebot-fab {
+    width: 64px; height: 64px; border-radius: 50%; border: 3px solid var(--gold);
+    background-image: url('/photos/circlelogo.jpeg'); background-size: cover; background-position: center;
+    cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,0.2); transition: transform 0.2s;
+  }
+  .sidebot-fab:hover { transform: scale(1.05); }
+
+  /* Markdown & Math styles */
+  .msg.ai pre { background: var(--cream); padding: 10px; border-radius: 6px; overflow-x: auto; margin: 10px 0; }
+  .msg.ai code { font-family: monospace; font-size: 0.9em; }
+  .msg.ai ul, .msg.ai ol { margin-left: 20px; margin-bottom: 10px; }
+
+</style>
+</head>
 <body>
 
-<h4> HEllo Everybody
+<nav class="topbar">
+  <div class="marca">
+    <img src="/photos/simplylogo.png" alt="Logo">
+    BachillerAI-Suite
+  </div>
+  <ul>
+    <li><a href="index.html">Inicio</a></li>
+    <li><a href="matematicas.html">Matemáticas</a></li>
+    <li><a href="feynman.html">Método Feynman</a></li>
+    <li><a href="examenespau.html">Exámenes PAU</a></li>
+  </ul>
+</nav>
 
-</h4>
+<div class="layout">
+  <main class="main-chat">
+    <header class="chat-header">
+       <h1>Matemáticas y Física (IA Resolutiva)</h1>
+       <p>Una IA especializada únicamente en resolución y explicación de matemáticas y física. Muestra los pasos intermedios y el porqué de cada operación.</p>
+       <div class="disclaimer">
+         ⚠️ <strong>Aviso:</strong> Las IAs pueden cometer errores y es necesario verificar la información. Para mejores resultados, se recomienda adjuntar un bloque de contexto previo antes de realizar preguntas.
+       </div>
+    </header>
+    
+    <div class="chat-messages" id="main-messages">
+       <!-- Chat history appears here -->
+    </div>
+    
+    <div class="chat-input-area">
+       <textarea id="main-input" placeholder="Pregunta un problema de matemáticas o física... (Ej: Calcula la fuerza de impacto de un monoplaza de F1...)"></textarea>
+       <button onclick="sendMainMessage()">Enviar</button>
+    </div>
+  </main>
+</div>
 
- </body>
+<!-- Widget Lateral Chatbot -->
+<div class="sidebot-widget">
+   <div class="sidebot-panel" id="sidebot-panel">
+      <div class="sidebot-header">
+         <span>Dudas Rápidas</span>
+         <button onclick="toggleSidebot()">✕</button>
+      </div>
+      <div class="chat-messages" id="side-messages"></div>
+      <div class="chat-input-area">
+         <textarea id="side-input" placeholder="Pregunta sobre lo generado..."></textarea>
+         <button onclick="sendSideMessage()">→</button>
+      </div>
+   </div>
+   <button class="sidebot-fab" onclick="toggleSidebot()" title="Chatbot de dudas rápidas"></button>
+</div>
+
+<script>
+
+  // Aislamiento total: variables en memoria, se limpian al recargar.
+  let mainChatHistory = [];
+  
+  function toggleSidebot() {
+    const panel = document.getElementById('sidebot-panel');
+    panel.classList.toggle('open');
+  }
+
+  function appendMessage(containerId, role, text, msgId = null) {
+    const container = document.getElementById(containerId);
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `msg ${role}`;
+    if (msgId) msgDiv.id = msgId;
+    
+    // Parseo rápido de markdown a HTML usando la librería marked
+    msgDiv.innerHTML = role === 'ai' && text !== '...' ? marked.parse(text) : text;
+    
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+    
+    // Renderizado de matemáticas si KaTeX está disponible
+    if (window.renderMathInElement) {
+        renderMathInElement(msgDiv, {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false}
+            ]
+        });
+    }
+    return msgId;
+  }
+
+  function updateMessage(msgId, newText) {
+    const msgDiv = document.getElementById(msgId);
+    if (msgDiv) {
+        msgDiv.innerHTML = marked.parse(newText);
+        if (window.renderMathInElement) {
+            renderMathInElement(msgDiv, {
+                delimiters: [
+                    {left: "$$", right: "$$", display: true},
+                    {left: "$", right: "$", display: false}
+                ]
+            });
+        }
+    }
+  }
+
+  async function sendSideMessage() {
+    const input = document.getElementById('side-input');
+    const text = input.value.trim();
+    if(!text) return;
+    input.value = '';
+
+    appendMessage('side-messages', 'user', text);
+
+    // Conexión del contexto: Se inserta la memoria del chat principal en el prompt del chatbot lateral.
+    const contextStr = mainChatHistory.map(m => `${m.role === 'user' ? 'Alumno' : 'IA Principal'}: ${m.content}`).join('\n\n');
+    const sidePrompt = `Eres un asistente de dudas rápidas. Aquí tienes el contexto de la conversación principal actual que el usuario está teniendo con la IA principal:\n\n[CONTEXTO COMIENZA]\n${contextStr || 'Ningún contexto previo, es el primer mensaje.'}\n[CONTEXTO TERMINA]\n\nDuda del usuario referida al contexto: ${text}\n\nResponde de forma clara, directa y coherente con el contexto.`;
+
+    const tempId = 'side-loading-' + Date.now();
+    appendMessage('side-messages', 'ai', '...', tempId);
+
+    try {
+      // Impulsado por Groq como se solicitó para las dudas rápidas.
+      const response = await fetch('/api/groq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: sidePrompt })
+      });
+      const data = await response.json();
+      updateMessage(tempId, data.resultado || "Error: Sin respuesta");
+    } catch (err) {
+      updateMessage(tempId, "Error de red al contactar con la IA.");
+    }
+    
+    const container = document.getElementById('side-messages');
+    container.scrollTop = container.scrollHeight;
+  }
+
+
+
+async function sendMainMessage() {
+    const input = document.getElementById('main-input');
+    const text = input.value.trim();
+    if(!text) return;
+    input.value = '';
+
+    appendMessage('main-messages', 'user', text);
+    mainChatHistory.push({ role: 'user', content: text });
+
+    const tempId = 'main-loading-' + Date.now();
+    appendMessage('main-messages', 'ai', 'Calculando y resolviendo paso a paso...', tempId);
+
+    try {
+        const response = await fetch('/api/gemini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: text })
+        });
+        const data = await response.json();
+        const resultText = data.resultado || "Error: No se recibió respuesta";
+        
+        mainChatHistory.push({ role: 'assistant', content: resultText });
+        updateMessage(tempId, resultText);
+    } catch (err) {
+        updateMessage(tempId, "Error al conectar con la IA de Matemáticas.");
+    }
+}
+
+</script>
+</body>
 </html>
